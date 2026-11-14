@@ -1,0 +1,215 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>COMBATE COLOMBIA</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101525;color:white;font-family:Arial;text-align:center;touch-action:none}
+header{padding:13px;background:#151c30}
+h1{margin:3px;color:#ffd43b;font-size:clamp(23px,6vw,36px);text-shadow:3px 3px #a22}
+header p{font-size:11px;letter-spacing:3px;color:#cbd5e1}
+.hud{display:flex;justify-content:space-around;padding:10px;gap:10px}
+.player{width:42%;font-weight:bold;font-size:12px}
+.bar{height:17px;background:#542d38;border:2px solid white;margin-top:5px}
+.life{height:100%;width:100%;background:#39dc65}
+#timer{font-size:23px;color:#ffd43b;font-weight:bold}
+canvas{display:block;width:100%;height:55vh;max-height:430px;background:#526b87;image-rendering:pixelated}
+#message{padding:8px;color:#ffd43b;font-weight:bold}
+#start{background:#d42f40;color:white;border:2px solid #ffd43b;border-radius:12px;padding:13px 25px;font-size:17px;font-weight:bold}
+.controls{display:flex;justify-content:space-around;gap:5px;padding:12px 5px}
+.group{display:grid;grid-template-columns:repeat(2,65px);gap:8px}
+button.control{height:57px;background:#293854;color:white;border:2px solid #8794ae;border-radius:13px;font-size:16px;font-weight:bold;touch-action:none}
+button.control:active{background:#d52f40}
+.attack{background:#922d38!important}
+footer{font-size:10px;color:#8290aa;padding:5px}
+</style>
+</head>
+<body>
+<header>
+<h1>🇨🇴 COMBATE COLOMBIA 🇨🇴</h1>
+<p>EL RING DE LA PATRIA • ARCADE</p>
+</header>
+
+<div class="hud">
+<div class="player">JUGADOR 1<div class="bar"><div id="life1" class="life"></div></div></div>
+<div id="timer">99</div>
+<div class="player">RIVAL CPU<div class="bar"><div id="life2" class="life"></div></div></div>
+</div>
+
+<canvas id="game" width="800" height="450"></canvas>
+<div id="message">¡PREPÁRATE PARA EL COMBATE!</div>
+<button id="start">🥊 COMENZAR PELEA</button>
+
+<div class="controls">
+<div class="group">
+<button class="control" data-key="left">◀</button>
+<button class="control" data-key="right">▶</button>
+<button class="control" data-key="jump">⬆ SALTAR</button>
+<button class="control" data-key="block">🛡 DEFENSA</button>
+</div>
+<div class="group">
+<button class="control attack" data-key="punch">👊 GOLPE</button>
+<button class="control attack" data-key="kick">🦵 PATADA</button>
+<button class="control" data-key="special">⚡ PODER</button>
+<button class="control" data-key="down">⬇</button>
+</div>
+</div>
+<footer>COMBATE COLOMBIA • PROTOTIPO 1.0</footer>
+
+<script>
+const c=document.getElementById("game");
+const ctx=c.getContext("2d");
+const W=800,H=450;
+const keys={};
+let playing=false,finished=false,time=99,elapsed=0,last=0;
+let p1,p2;
+
+function fighter(x,color,face){
+return {x,y:350,vy:0,hp:100,color,face,attack:0,kind:"",cool:0,guard:false,ground:true};
+}
+function reset(){
+p1=fighter(220,"#2676e8",1);
+p2=fighter(580,"#db3444",-1);
+playing=true;finished=false;time=99;elapsed=0;
+update();
+document.getElementById("message").textContent="¡A LUCHAR!";
+}
+function rect(x,y,w,h,color){
+ctx.fillStyle=color;ctx.fillRect(x,y,w,h);
+}
+function background(){
+let g=ctx.createLinearGradient(0,0,0,H);
+g.addColorStop(0,"#66a9d1");g.addColorStop(1,"#b9a17a");
+ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ctx.fillStyle="#526f70";
+ctx.beginPath();ctx.moveTo(0,260);ctx.lineTo(150,100);ctx.lineTo(280,260);ctx.lineTo(440,90);ctx.lineTo(630,260);ctx.lineTo(800,120);ctx.lineTo(800,350);ctx.lineTo(0,350);ctx.fill();
+for(let i=0;i<9;i++){
+let x=i*95;
+rect(x,190,70,160,"#b58a6c");
+for(let j=0;j<3;j++)rect(x+10+j*19,210,9,13,"#f8d779");
+}
+rect(0,350,800,100,"#a77c52");
+rect(0,350,800,7,"#e1bd8c");
+for(let i=0;i<10;i++)rect(i*90,380,2,70,"#d3a77b");
+}
+function drawFighter(f){
+ctx.save();
+ctx.translate(f.x,f.y);
+ctx.scale(f.face,1);
+let hit=f.attack>0;
+let skin="#d99a72";
+rect(-15,-65,30,35,f.color);
+rect(-19,-78,38,17,skin);
+rect(-20,-81,40,8,"#262331");
+rect(-12,-68,4,4,"#161616");
+rect(8,-68,4,4,"#161616");
+rect(-16,-32,13,29,"#25375c");
+rect(4,-32,13,29,"#25375c");
+rect(-20,-4,19,7,"#222");
+rect(3,-4,20,7,"#222");
+if(f.guard){
+rect(17,-65,13,30,"#d6b34d");
+}else if(hit){
+rect(15,-67,hit?43:15,12,"#d99a72");
+rect(54,-69,13,14,"#f2c49b");
+}else{
+rect(14,-68,12,30,skin);
+}
+rect(-25,-62,10,27,skin);
+if(f.attack>0){
+ctx.fillStyle="#fff3a1";
+ctx.beginPath();ctx.arc(65,-65,8,0,Math.PI*2);ctx.fill();
+}
+ctx.restore();
+text(f===p1?"JUGADOR":"RIVAL",f.x, f.y-100,13,"white");
+}
+function text(t,x,y,s,color){
+ctx.fillStyle=color;ctx.font="bold "+s+"px Arial";ctx.textAlign="center";ctx.fillText(t,x,y);
+}
+function update(){
+document.getElementById("life1").style.width=p1.hp+"%";
+document.getElementById("life2").style.width=p2.hp+"%";
+document.getElementById("timer").textContent=time;
+}
+function attack(a,b,type){
+if(a.cool>0||!playing)return;
+a.attack=18;a.kind=type;a.cool=type==="special"?75:35;
+let distance=Math.abs(a.x-b.x);
+if(distance<105){
+let damage=type==="punch"?9:type==="kick"?13:24;
+if(!b.guard)b.hp=Math.max(0,b.hp-damage);
+else b.hp=Math.max(0,b.hp-damage*.2);
+update();
+}
+}
+function move(f){
+if(f.attack>0)f.attack--;
+if(f.cool>0)f.cool--;
+if(f.vy!==0||!f.ground){
+f.y+=f.vy;f.vy+=.8;
+if(f.y>=350){f.y=350;f.vy=0;f.ground=true;}
+}
+}
+function draw(){
+ctx.clearRect(0,0,W,H);
+background();
+if(p1&&p2){
+drawFighter(p1);drawFighter(p2);
+}
+}
+function finish(msg){
+playing=false;finished=true;
+document.getElementById("message").textContent=msg;
+}
+function loop(now){
+let dt=Math.min((now-last)/16.67,3);last=now;
+if(playing){
+elapsed+=dt;
+if(elapsed>60){elapsed=0;time--;update();}
+p1.guard=!!keys.block;
+p2.guard=false;
+let speed=4;
+if(keys.left)p1.x-=speed*dt;
+if(keys.right)p1.x+=speed*dt;
+if(keys.jump&&p1.ground){p1.vy=-13;p1.ground=false;}
+if(keys.punch)attack(p1,p2,"punch");
+if(keys.kick)attack(p1,p2,"kick");
+if(keys.special)attack(p1,p2,"special");
+let dist=p1.x-p2.x;
+p2.face=dist<0?1:-1;
+if(Math.abs(dist)>80)p2.x+=Math.sign(dist)*2.1*dt;
+else if(Math.random()<.035*dt)attack(p2,p1,Math.random()<.5?"punch":"kick");
+if(p2.hp<=0)finish("🏆 ¡VICTORIA COLOMBIANA!");
+if(p1.hp<=0)finish("¡DERROTA! INTENTA OTRA VEZ");
+if(time<=0)finish(p1.hp>=p2.hp?"¡GANASTE!":"¡GANA EL RIVAL!");
+p1.x=Math.max(30,Math.min(770,p1.x));
+p2.x=Math.max(30,Math.min(770,p2.x));
+move(p1);move(p2);
+}
+draw();
+requestAnimationFrame(loop);
+}
+document.querySelectorAll("[data-key]").forEach(btn=>{
+let key=btn.dataset.key;
+btn.addEventListener("pointerdown",e=>{
+e.preventDefault();keys[key]=true;
+});
+["pointerup","pointerleave","pointercancel"].forEach(event=>{
+btn.addEventListener(event,()=>keys[key]=false);
+});
+});
+window.addEventListener("keydown",e=>{
+keys[({ArrowLeft:"left",ArrowRight:"right",ArrowUp:"jump", " ":"punch",z:"kick",x:"special"})[e.key]||e.key]=true;
+});
+window.addEventListener("keyup",e=>{
+keys[({ArrowLeft:"left",ArrowRight:"right",ArrowUp:"jump"," ":"punch",z:"kick",x:"special"})[e.key]||e.key]=false;
+});
+document.getElementById("start").addEventListener("click",reset);
+reset();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
