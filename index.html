@@ -3,169 +3,408 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>COMBATE COLOMBIA V2</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>COMBATE COLOMBIA V3</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#101326;color:white;font-family:Arial,sans-serif;text-align:center}
-header{padding:20px;background:linear-gradient(120deg,#172044,#5b183c)}
-h1{font-size:clamp(25px,7vw,42px);color:#ffd43b;margin:5px;text-shadow:3px 3px #c22}
-header p{color:#ddd;margin:8px}
-button{border:0;border-radius:10px;padding:13px 17px;font-weight:bold;background:#ffd43b;color:#171717;cursor:pointer}
-button:active{transform:scale(.95)}
-.screen{padding:15px;max-width:850px;margin:auto}
+body{margin:0;background:#101522;color:white;font-family:Arial,sans-serif;text-align:center}
+header{padding:17px;background:linear-gradient(110deg,#e2ae22,#173d86,#b52c32)}
+h1{margin:0;font-size:clamp(25px,6vw,42px);text-shadow:3px 3px #111}
+header p{margin:6px 0;font-weight:bold}
+.screen{max-width:1000px;margin:auto;padding:14px}
+h2{color:#ffd34b}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.card{background:#252e46;border:2px solid #58627d;border-radius:12px;padding:10px;cursor:pointer}
+.card.selected{border:3px solid #ffd34b;background:#45402d}
+.card .portrait{font-size:42px}
+.card strong{display:block;font-size:14px;margin:5px}
+.card small{color:#c5c9d2}
+button{border:0;border-radius:10px;padding:13px;background:#ffd13c;color:#171717;font-weight:bold;cursor:pointer}
+button:active{transform:scale(.96)}
+.start{margin:16px;font-size:19px}
 .hidden{display:none!important}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.fighter{background:#252b48;border:2px solid #444b70;border-radius:12px;padding:12px;cursor:pointer}
-.fighter.selected{border-color:#ffd43b;background:#48402c}
-.avatar{font-size:48px;display:block;margin:5px}
-.fighter strong{display:block}
-small{color:#ccc}
-#arena{position:relative;overflow:hidden;border:3px solid #e2c16a;border-radius:12px;height:290px;background:linear-gradient(#72b8d6 0 55%,#b4a17b 55% 70%,#454b4d 70%);margin:12px auto}
-#arena:before{content:"🏛️  🏛️  🏛️";position:absolute;top:65px;left:0;width:100%;font-size:53px;letter-spacing:4px}
-#arena:after{content:"PLAZA DE BOLÍVAR • COLOMBIA";position:absolute;bottom:8px;left:0;width:100%;font-size:12px;color:white;font-weight:bold;text-shadow:1px 2px black}
-.fighter-sprite{position:absolute;bottom:48px;font-size:76px;z-index:2;transition:transform .12s}
-#playerSprite{left:15%}
-#enemySprite{right:15%;transform:scaleX(-1)}
-#playerSprite.hit{transform:translateX(25px) rotate(-12deg)}
-#enemySprite.hit{transform:scaleX(-1) translateX(25px) rotate(-12deg)}
-.hud{display:grid;grid-template-columns:1fr 65px 1fr;align-items:center;gap:8px}
-.health{height:20px;background:#555;border:2px solid white;border-radius:6px;overflow:hidden}
-.fill{height:100%;width:100%;background:#39d66c;transition:width .2s}
-#enemyHealth{background:#f14e50}
-#timer{font-size:25px;font-weight:bold}
-#controls{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:15px auto}
-#controls button{padding:18px 3px;font-size:13px;background:#303a64;color:white;border:1px solid #7884b8}
-#controls button.special{background:#a82f56}
-#message{min-height:28px;color:#ffd43b;font-weight:bold}
-@media(min-width:600px){.grid{grid-template-columns:repeat(3,1fr)}#arena{height:350px}}
+#hud{display:grid;grid-template-columns:1fr 55px 1fr;gap:8px;align-items:center}
+.health{height:19px;background:#572e38;border:2px solid white;border-radius:5px;overflow:hidden}
+.fill{height:100%;width:100%;background:#36d66d;transition:width .2s}
+#lifeB{background:#e84949}
+#timer{font-size:25px;color:#ffdb4b;font-weight:bold}
+canvas{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#333;border:3px solid #d9b94c;border-radius:9px;margin:10px auto;touch-action:none}
+#message{min-height:25px;color:#ffda53;font-weight:bold}
+.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:12px auto}
+.controls button{background:#303e66;color:white;padding:15px 3px;min-height:57px;font-size:14px;touch-action:none}
+.controls .special{background:#a72f59}
+.controls .move{background:#465779}
+.note{font-size:11px;color:#aaa}
+@media(min-width:650px){.grid{grid-template-columns:repeat(5,1fr)}}
 </style>
 </head>
 <body>
+
 <header>
 <h1>🇨🇴 COMBATE COLOMBIA</h1>
-<p>¡Que comience el combate!</p>
+<p>ARENA 2.5D • EDICIÓN V3</p>
 </header>
 
 <section id="selection" class="screen">
-<h2>ELIGE TU LUCHADOR</h2>
-<p>Selecciona tu personaje para comenzar.</p>
-<div class="grid" id="fighters"></div>
-<br>
-<button onclick="startGame()">⚔️ COMENZAR COMBATE</button>
+<h2>SELECCIONA TU LUCHADOR</h2>
+<p>Escoge tu personaje para entrar a la arena.</p>
+<div class="grid" id="roster"></div>
+<button class="start" onclick="startGame()">🥊 COMENZAR COMBATE</button>
+<p class="note">Juego de ficción con personajes de sátira política.</p>
 </section>
 
 <section id="game" class="screen hidden">
-<div class="hud">
-<div><small id="playerName">JUGADOR</small><div class="health"><div class="fill" id="playerHealth"></div></div></div>
+<div id="hud">
+<div><small id="nameA"></small><div class="health"><div id="lifeA" class="fill"></div></div></div>
 <div id="timer">60</div>
-<div><small id="enemyName">RIVAL</small><div class="health"><div class="fill" id="enemyHealth"></div></div></div>
+<div><small id="nameB"></small><div class="health"><div id="lifeB" class="fill"></div></div></div>
 </div>
-<div id="arena">
-<div id="playerSprite" class="fighter-sprite">🧔</div>
-<div id="enemySprite" class="fighter-sprite">👨</div>
+
+<canvas id="arena" width="960" height="540"></canvas>
+<div id="message">¡QUE COMIENCE LA BATALLA!</div>
+
+<div class="controls">
+<button class="move" data-key="left">◀ IZQUIERDA</button>
+<button class="move" data-key="right">DERECHA ▶</button>
+<button class="move" data-key="up">⬆ ADELANTE</button>
+<button class="move" data-key="down">⬇ ATRÁS</button>
+<button data-action="punch">👊 GOLPE</button>
+<button data-action="kick">🦵 PATADA</button>
+<button class="special" data-action="special">⚡ ESPECIAL</button>
+<button data-action="block">🛡️ BLOQUEAR</button>
 </div>
-<div id="message">¡Prepárate para luchar!</div>
-<div id="controls">
-<button onclick="attack('punch')">👊<br>GOLPE</button>
-<button onclick="attack('kick')">🦵<br>PATADA</button>
-<button onclick="attack('special')" class="special">⚡<br>ESPECIAL</button>
-<button onclick="defend()">🛡️<br>DEFENDER</button>
-</div>
+
 <button onclick="backToMenu()">VOLVER AL MENÚ</button>
+<p class="note">También puedes usar W A S D o las flechas del teclado. J: golpe, K: patada, L: especial.</p>
 </section>
 
 <script>
 const characters=[
-{name:"Gustavo Petro",emoji:"🧔",power:8},
-{name:"Álvaro Uribe",emoji:"👨🏻",power:9},
-{name:"Iván Duque",emoji:"👨🏼",power:7},
-{name:"Juan Manuel Santos",emoji:"👨🏻‍🦳",power:7},
-{name:"Iván Cepeda",emoji:"👨🏻‍🦲",power:8},
-{name:"Paloma Valencia",emoji:"👩🏼",power:8},
-{name:"Claudia López",emoji:"👩🏻",power:8},
-{name:"Carlos Fernando Galán",emoji:"👨🏻‍🦱",power:7},
-{name:"Federico Gutiérrez",emoji:"👨🏻‍💼",power:8},
-{name:"Abelardo de la Espriella",emoji:"🕴️",power:9}
+{name:"Gustavo Petro",face:"👨🏻",hair:"#29201d",skin:"#bb805f",suit:"#9b292d",tie:"#e8bd38",power:8},
+{name:"Álvaro Uribe",face:"👨🏻",hair:"#4a3020",skin:"#d49b72",suit:"#293e6a",tie:"#d9bc55",power:9},
+{name:"Iván Duque",face:"👨🏻",hair:"#392b20",skin:"#d5a27c",suit:"#80502e",tie:"#e1c34e",power:7},
+{name:"Juan Manuel Santos",face:"👨🏻",hair:"#777064",skin:"#d6a37f",suit:"#365c77",tie:"#d6d5cc",power:7},
+{name:"Iván Cepeda",face:"👨🏻",hair:"#aaa39a",skin:"#d0a080",suit:"#673b58",tie:"#e3c45d",power:8},
+{name:"Paloma Valencia",face:"👩🏻",hair:"#9b6032",skin:"#edc19f",suit:"#68428b",tie:"#d9bd43",power:8},
+{name:"Claudia López",face:"👩🏻",hair:"#63452e",skin:"#dfad89",suit:"#23765d",tie:"#e4c64c",power:8},
+{name:"Carlos F. Galán",face:"👨🏻",hair:"#44342c",skin:"#d6a080",suit:"#9a6331",tie:"#e1c34e",power:7},
+{name:"Federico Gutiérrez",face:"👨🏻",hair:"#493528",skin:"#d3a080",suit:"#36684a",tie:"#e2c64c",power:8},
+{name:"Abelardo de la Espriella",face:"👨🏻",hair:"#302b28",skin:"#d6a17b",suit:"#484568",tie:"#e6c64b",power:9}
 ];
-let chosen=0,player=100,enemy=100,time=60,interval=null,guard=false,busy=false;
-const $=id=>document.getElementById(id);
 
+const $=id=>document.getElementById(id);
+let chosen=0,playing=false,seconds=60,lastTime=0,frame=0,raf=0;
+let A=null,B=null,keys={},guard=false;
+
+const roster=$("roster");
 characters.forEach((c,i)=>{
-let d=document.createElement("div");
-d.className="fighter"+(i===0?" selected":"");
-d.innerHTML=`<span class="avatar">${c.emoji}</span><strong>${c.name}</strong><small>Fuerza: ${c.power}/10</small>`;
-d.onclick=()=>{
+let el=document.createElement("div");
+el.className="card"+(i===0?" selected":"");
+el.innerHTML=`<div class="portrait">${c.face}</div><strong>${c.name}</strong><small>Fuerza ${c.power}/10</small>`;
+el.onclick=()=>{
 chosen=i;
-document.querySelectorAll(".fighter").forEach(x=>x.classList.remove("selected"));
-d.classList.add("selected");
+document.querySelectorAll(".card").forEach(x=>x.classList.remove("selected"));
+el.classList.add("selected");
 };
-$("fighters").appendChild(d);
+roster.appendChild(el);
 });
 
+function makeFighter(index,x,y,player){
+return {index,x,y,hp:100,player,action:"idle",actionTime:0,
+cooldown:0,face:player?1:-1,blocking:false};
+}
+
 function startGame(){
-player=100;enemy=100;time=60;guard=false;busy=false;
+cancelAnimationFrame(raf);
 $("selection").classList.add("hidden");
 $("game").classList.remove("hidden");
-$("playerName").textContent=characters[chosen].name;
-$("enemyName").textContent=characters[(chosen+1)%10].name;
-$("playerSprite").textContent=characters[chosen].emoji;
-$("enemySprite").textContent=characters[(chosen+1)%10].emoji;
-update();
-$("message").textContent="¡A LUCHAR!";
-clearInterval(interval);
-interval=setInterval(()=>{
-time--;
-$("timer").textContent=time;
-if(time<=0)finish();
-else if(Math.random()<.45)enemyAttack();
-},1000);
+A=makeFighter(chosen,280,340,true);
+B=makeFighter((chosen+1)%10,680,340,false);
+$("nameA").textContent=characters[A.index].name;
+$("nameB").textContent=characters[B.index].name;
+seconds=60;playing=true;guard=false;lastTime=0;
+$("timer").textContent=seconds;
+$("message").textContent="¡PELEA!";
+updateHud();
+raf=requestAnimationFrame(loop);
 }
-function update(){
-$("playerHealth").style.width=Math.max(0,player)+"%";
-$("enemyHealth").style.width=Math.max(0,enemy)+"%";
+
+function updateHud(){
+$("lifeA").style.width=A.hp+"%";
+$("lifeB").style.width=B.hp+"%";
 }
-function animate(id){
-let el=$(id);
-el.classList.add("hit");
-setTimeout(()=>el.classList.remove("hit"),180);
-}
-function attack(type){
-if(busy||!interval||time<=0)return;
-busy=true;
+
+function say(text){$("message").textContent=text}
+
+function attack(f,type){
+if(!playing||f.hp<=0||f.cooldown>0)return;
+f.action=type;
+f.actionTime=type==="special"?.65:.35;
+f.cooldown=type==="special"?1.2:.55;
+let opponent=f.player?B:A;
+let distance=Math.abs(f.x-opponent.x);
+let lane=Math.abs(f.y-opponent.y);
+if(distance<175&&lane<75){
 let damage=type==="punch"?8:type==="kick"?13:22;
-if(type==="special"&&Math.random()<.25)damage=10;
-enemy=Math.max(0,enemy-damage);
-animate("playerSprite");
-$("message").textContent=(type==="special"?"⚡ ¡PODER ESPECIAL! ":type==="kick"?"🦵 ¡PATADA! ":"👊 ¡GOLPE! ")+ "-"+damage;
-update();
-if(enemy<=0){finish();return}
-setTimeout(()=>{busy=false},350);
+if(opponent.blocking)damage=Math.ceil(damage*.25);
+opponent.hp=Math.max(0,opponent.hp-damage);
+opponent.action="hit";
+opponent.actionTime=.3;
+opponent.x+=f.face*12;
+say(type==="special"?"⚡ ¡PODER ESPECIAL!":type==="kick"?"🦵 ¡PATADA!":"👊 ¡GOLPE!");
+updateHud();
+if(opponent.hp<=0)finish(f.player);
+}else say("¡ACÉRCATE A TU RIVAL!");
 }
-function defend(){
-if(!interval||time<=0)return;
-guard=true;
-$("message").textContent="🛡️ ¡DEFENSA ACTIVADA!";
-setTimeout(()=>guard=false,1300);
+
+function defend(f){
+f.blocking=true;
+f.action="block";
+f.actionTime=.4;
 }
-function enemyAttack(){
-if(enemy<=0||player<=0)return;
-let damage=guard?3:Math.floor(Math.random()*8)+4;
-player=Math.max(0,player-damage);
-animate("enemySprite");
-$("message").textContent="¡El rival ataca! -"+damage;
-update();
-if(player<=0)finish();
+
+function finish(winner){
+if(!playing)return;
+playing=false;
+say(winner===true?"🏆 ¡VICTORIA!":winner===false?"💥 ¡DERROTA!":"🤝 ¡EMPATE!");
 }
-function finish(){
-clearInterval(interval);interval=null;busy=false;
-$("message").textContent=player>enemy?"🏆 ¡VICTORIA!":player<enemy?"💥 ¡DERROTA!":"🤝 ¡EMPATE!";
+
+function ai(dt){
+if(!playing)return;
+B.cooldown=Math.max(0,B.cooldown-dt);
+let dx=A.x-B.x,dy=A.y-B.y;
+if(Math.abs(dx)>130)B.x+=Math.sign(dx)*95*dt;
+if(Math.abs(dy)>28)B.y+=Math.sign(dy)*65*dt;
+B.x=Math.max(70,Math.min(890,B.x));
+B.y=Math.max(245,Math.min(420,B.y));
+if(Math.abs(dx)<155&&Math.abs(dy)<65&&B.cooldown<=0&&Math.random()<.07){
+attack(B,Math.random()<.3?"kick":"punch");
 }
+}
+
+function updateFighter(f,dt){
+f.cooldown=Math.max(0,f.cooldown-dt);
+f.actionTime=Math.max(0,f.actionTime-dt);
+if(f.actionTime===0&&f.action!=="idle"){
+f.action="idle";f.blocking=false;
+}
+}
+
+function movePlayer(dt){
+if(!playing)return;
+let speed=210*dt;
+if(keys.left)A.x-=speed;
+if(keys.right)A.x+=speed;
+if(keys.up)A.y-=speed;
+if(keys.down)A.y+=speed;
+A.x=Math.max(50,Math.min(910,A.x));
+A.y=Math.max(245,Math.min(420,A.y));
+if(keys.left)A.face=-1;
+if(keys.right)A.face=1;
+}
+
+const canvas=$("arena"),ctx=canvas.getContext("2d");
+
+function background(){
+let g=ctx.createLinearGradient(0,0,0,540);
+g.addColorStop(0,"#78b9d3");g.addColorStop(.62,"#c7d2d0");g.addColorStop(1,"#8c795d");
+ctx.fillStyle=g;ctx.fillRect(0,0,960,540);
+
+// edificios
+ctx.fillStyle="#d6c8aa";
+ctx.fillRect(35,110,180,145);
+ctx.fillRect(745,105,180,150);
+ctx.fillStyle="#9c7653";
+for(let x=55;x<210;x+=40)for(let y=135;y<235;y+=48)ctx.fillRect(x,y,18,24);
+for(let x=765;x<920;x+=40)for(let y=130;y<235;y+=48)ctx.fillRect(x,y,18,24);
+
+// plaza y palacio
+ctx.fillStyle="#e6e0ce";
+ctx.fillRect(285,120,390,130);
+ctx.fillStyle="#b7a78c";
+ctx.fillRect(310,150,340,100);
+ctx.fillStyle="#e9e1d0";
+ctx.fillRect(330,120,300,24);
+for(let x=345;x<625;x+=42){
+ctx.fillStyle="#8a8174";
+ctx.fillRect(x,153,12,88);
+}
+ctx.fillStyle="#d2b66d";
+ctx.fillRect(470,85,20,36);
+ctx.fillRect(460,80,40,8);
+
+// bandera
+ctx.fillStyle="#f5d52b";ctx.fillRect(30,30,80,18);
+ctx.fillStyle="#2454a1";ctx.fillRect(30,48,80,18);
+ctx.fillStyle="#c83235";ctx.fillRect(30,66,80,18);
+ctx.fillStyle="#fff";ctx.font="bold 20px Arial";
+ctx.fillText("BOGOTÁ • COLOMBIA",350,45);
+
+// suelo con perspectiva
+ctx.fillStyle="#8a7764";
+ctx.beginPath();ctx.moveTo(0,260);ctx.lineTo(960,260);ctx.lineTo(960,540);ctx.lineTo(0,540);ctx.fill();
+ctx.strokeStyle="#b8a58a";ctx.lineWidth=3;
+for(let y=285;y<540;y+=48){
+ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(960,y);ctx.stroke();
+}
+for(let x=-300;x<1300;x+=150){
+ctx.beginPath();ctx.moveTo(480,260);ctx.lineTo(x,540);ctx.stroke();
+}
+}
+
+function drawFighter(f){
+let c=characters[f.index];
+let scale=.78+(f.y-245)/175*.32;
+let x=f.x,y=f.y;
+ctx.save();
+ctx.translate(x,y);
+ctx.scale(scale,scale);
+ctx.scale(f.face,1);
+let moving=f.action==="idle"?Math.sin(frame*.006)*2:0;
+let attacking=f.action==="punch"||f.action==="kick"||f.action==="special";
+let hit=f.action==="hit";
+let swing=attacking?Math.sin(frame*.025)*.7:0;
+let legSwing=attacking?.5:Math.sin(frame*.01)*.08;
+
+// sombra
+ctx.fillStyle="rgba(0,0,0,.3)";
+ctx.beginPath();ctx.ellipse(0,5,48,12,0,0,Math.PI*2);ctx.fill();
+
+// piernas
+ctx.save();
+ctx.translate(0,moving);
+ctx.strokeStyle="#242632";ctx.lineWidth=17;ctx.lineCap="round";
+ctx.beginPath();ctx.moveTo(-13,-63);ctx.lineTo(-18+legSwing*15,-12);ctx.stroke();
+ctx.beginPath();ctx.moveTo(13,-63);ctx.lineTo(18-legSwing*15,-12);ctx.stroke();
+ctx.strokeStyle="#171a22";ctx.lineWidth=9;
+ctx.beginPath();ctx.moveTo(-18+legSwing*15,-12);ctx.lineTo(-35+legSwing*15,-9);ctx.stroke();
+ctx.beginPath();ctx.moveTo(18-legSwing*15,-12);ctx.lineTo(35-legSwing*15,-9);ctx.stroke();
+
+// chaqueta / cuerpo
+ctx.fillStyle=c.suit;
+ctx.beginPath();ctx.moveTo(-30,-155);ctx.lineTo(30,-155);ctx.lineTo(38,-72);ctx.lineTo(-38,-72);ctx.closePath();ctx.fill();
+ctx.strokeStyle="#28242a";ctx.lineWidth=3;ctx.stroke();
+ctx.fillStyle="#eee2d1";
+ctx.beginPath();ctx.moveTo(-9,-151);ctx.lineTo(0,-125);ctx.lineTo(10,-151);ctx.fill();
+ctx.fillStyle=c.tie;
+ctx.beginPath();ctx.moveTo(-4,-145);ctx.lineTo(4,-145);ctx.lineTo(7,-100);ctx.lineTo(0,-91);ctx.lineTo(-7,-100);ctx.fill();
+
+// brazos
+ctx.strokeStyle=c.skin;ctx.lineWidth=16;ctx.lineCap="round";
+ctx.beginPath();ctx.moveTo(-27,-145);ctx.lineTo(-42,-111);ctx.lineTo(-36,-90);ctx.stroke();
+ctx.save();
+ctx.translate(28,-145);
+ctx.rotate(attacking?-.9-swing:-.35);
+ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(12,33);ctx.lineTo(8,52);ctx.stroke();
+ctx.fillStyle=c.skin;ctx.beginPath();ctx.arc(8,55,10,0,Math.PI*2);ctx.fill();
+ctx.restore();
+
+// cabeza
+ctx.fillStyle=c.skin;
+ctx.beginPath();ctx.ellipse(0,-180,24,29,0,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle="#29201d";ctx.lineWidth=2;ctx.stroke();
+// orejas
+ctx.beginPath();ctx.arc(-23,-179,6,0,Math.PI*2);ctx.arc(23,-179,6,0,Math.PI*2);ctx.fill();
+// cabello
+ctx.fillStyle=c.hair;
+ctx.beginPath();ctx.ellipse(0,-200,25,13,0,Math.PI,Math.PI*2);ctx.fill();
+ctx.fillRect(-23,-200,6,13);ctx.fillRect(17,-200,6,13);
+// ojos
+ctx.fillStyle="#211b18";
+ctx.beginPath();ctx.arc(-9,-182,2.5,0,Math.PI*2);ctx.arc(9,-182,2.5,0,Math.PI*2);ctx.fill();
+// nariz y boca
+ctx.strokeStyle="#754a39";ctx.lineWidth=2;
+ctx.beginPath();ctx.moveTo(0,-180);ctx.lineTo(-2,-172);ctx.lineTo(3,-171);ctx.stroke();
+ctx.beginPath();ctx.moveTo(-7,-164);ctx.lineTo(7,-164);ctx.stroke();
+ctx.restore();
+
+// indicador de bloqueo
+if(f.blocking){
+ctx.strokeStyle="#8adfff";ctx.lineWidth=4;
+ctx.beginPath();ctx.arc(0,-115,57,-1.2,1.2);ctx.stroke();
+}
+if(f.action==="special"){
+ctx.fillStyle="rgba(255,215,50,.75)";
+ctx.beginPath();ctx.arc(0,-110,75,0,Math.PI*2);ctx.stroke();
+}
+ctx.restore();
+}
+
+function loop(timestamp){
+if(!playing)return;
+if(!lastTime)lastTime=timestamp;
+let dt=Math.min((timestamp-lastTime)/1000,.04);
+lastTime=timestamp;
+frame=timestamp;
+movePlayer(dt);
+ai(dt);
+updateFighter(A,dt);
+updateFighter(B,dt);
+background();
+
+// dibujar según profundidad
+if(A.y<B.y){drawFighter(A);drawFighter(B)}
+else{drawFighter(B);drawFighter(A)}
+
+if(seconds>0){
+window._clock=(window._clock||0)+dt;
+if(window._clock>=1){
+seconds--;window._clock=0;
+$("timer").textContent=seconds;
+if(seconds<=0)finish(A.hp===B.hp?null:A.hp>B.hp);
+}
+}
+raf=requestAnimationFrame(loop);
+}
+
+function finish(winner){
+playing=false;
+cancelAnimationFrame(raf);
+say(winner===true?"🏆 ¡VICTORIA!":winner===false?"💥 ¡DERROTA!":"🤝 ¡EMPATE!");
+}
+
 function backToMenu(){
-clearInterval(interval);interval=null;
+playing=false;cancelAnimationFrame(raf);
 $("game").classList.add("hidden");
 $("selection").classList.remove("hidden");
 }
+
+function action(name){
+if(!playing)return;
+if(name==="punch")attack(A,"punch");
+if(name==="kick")attack(A,"kick");
+if(name==="special")attack(A,"special");
+if(name==="block")defend(A);
+}
+
+// controles táctiles
+document.querySelectorAll("[data-key]").forEach(btn=>{
+let key=btn.dataset.key;
+btn.addEventListener("pointerdown",e=>{e.preventDefault();keys[key]=true});
+["pointerup","pointercancel","pointerleave"].forEach(ev=>btn.addEventListener(ev,()=>keys[key]=false));
+});
+document.querySelectorAll("[data-action]").forEach(btn=>{
+btn.addEventListener("pointerdown",e=>{e.preventDefault();action(btn.dataset.action)});
+});
+
+// teclado
+document.addEventListener("keydown",e=>{
+let k=e.key.toLowerCase();
+if(["arrowleft","a"].includes(k))keys.left=true;
+if(["arrowright","d"].includes(k))keys.right=true;
+if(["arrowup","w"].includes(k))keys.up=true;
+if(["arrowdown","s"].includes(k))keys.down=true;
+if(k==="j")action("punch");
+if(k==="k")action("kick");
+if(k==="l")action("special");
+});
+document.addEventListener("keyup",e=>{
+let k=e.key.toLowerCase();
+if(["arrowleft","a"].includes(k))keys.left=false;
+if(["arrowright","d"].includes(k))keys.right=false;
+if(["arrowup","w"].includes(k))keys.up=false;
+if(["arrowdown","s"].includes(k))keys.down=false;
+});
 </script>
 </body>
 </html>
