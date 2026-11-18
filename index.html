@@ -4,407 +4,490 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>COMBATE COLOMBIA V3</title>
+<title>COMBATE COLOMBIA</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#101522;color:white;font-family:Arial,sans-serif;text-align:center}
-header{padding:17px;background:linear-gradient(110deg,#e2ae22,#173d86,#b52c32)}
-h1{margin:0;font-size:clamp(25px,6vw,42px);text-shadow:3px 3px #111}
-header p{margin:6px 0;font-weight:bold}
-.screen{max-width:1000px;margin:auto;padding:14px}
-h2{color:#ffd34b}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
-.card{background:#252e46;border:2px solid #58627d;border-radius:12px;padding:10px;cursor:pointer}
-.card.selected{border:3px solid #ffd34b;background:#45402d}
-.card .portrait{font-size:42px}
-.card strong{display:block;font-size:14px;margin:5px}
-.card small{color:#c5c9d2}
-button{border:0;border-radius:10px;padding:13px;background:#ffd13c;color:#171717;font-weight:bold;cursor:pointer}
-button:active{transform:scale(.96)}
-.start{margin:16px;font-size:19px}
-.hidden{display:none!important}
-#hud{display:grid;grid-template-columns:1fr 55px 1fr;gap:8px;align-items:center}
-.health{height:19px;background:#572e38;border:2px solid white;border-radius:5px;overflow:hidden}
-.fill{height:100%;width:100%;background:#36d66d;transition:width .2s}
-#lifeB{background:#e84949}
-#timer{font-size:25px;color:#ffdb4b;font-weight:bold}
-canvas{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#333;border:3px solid #d9b94c;border-radius:9px;margin:10px auto;touch-action:none}
-#message{min-height:25px;color:#ffda53;font-weight:bold}
-.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:12px auto}
-.controls button{background:#303e66;color:white;padding:15px 3px;min-height:57px;font-size:14px;touch-action:none}
-.controls .special{background:#a72f59}
-.controls .move{background:#465779}
-.note{font-size:11px;color:#aaa}
-@media(min-width:650px){.grid{grid-template-columns:repeat(5,1fr)}}
+body{margin:0;background:#090e16;color:#fff;font-family:Arial,sans-serif}
+button,select{font:inherit}
+header{text-align:center;padding:15px 8px;background:linear-gradient(110deg,#101d2b,#263d50,#101d2b);border-bottom:3px solid #e9b943}
+h1{font-size:clamp(25px,6vw,42px);margin:0;color:#ffd45d;text-shadow:2px 3px #542c17}
+header p{margin:6px 0 0;font-size:11px;letter-spacing:3px;color:#d7e1e8}
+main{max-width:1050px;margin:auto;padding:12px}
+.screen{display:none}
+.screen.active{display:block}
+h2{text-align:center;color:#ffd45d}
+.menu{display:grid;gap:12px;max-width:500px;margin:25px auto}
+button{border:0;border-radius:9px;padding:13px 16px;font-weight:bold;cursor:pointer}
+.primary{background:linear-gradient(#ffd967,#d69522);color:#17120a}
+.secondary{background:#263c50;color:white;border:1px solid #68839a}
+.danger{background:#a52e35;color:white}
+select{background:#182a3a;color:white;border:1px solid #59758a;padding:12px;border-radius:8px;width:100%}
+.field{margin:12px 0}
+.field label{display:block;margin-bottom:6px;color:#b9cbd8;font-size:13px}
+.roster{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.person{background:#182532;border:1px solid #40576a;border-radius:10px;padding:9px;text-align:center}
+.person.selected{border:2px solid #ffd45d;background:#293a43}
+.person canvas{width:100%;max-width:110px;height:130px}
+.person strong{display:block;font-size:12px}
+.person small{color:#aabac5}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+#battle{padding:0}
+.hud{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;padding:10px;background:#142333}
+.hudname{font-size:12px;font-weight:bold;overflow:hidden}
+.hudname:last-child{text-align:right}
+.life{height:16px;background:#4a2525;border:2px solid #d9d9d9;border-radius:12px;overflow:hidden;margin-top:5px}
+.life div{height:100%;width:100%;background:linear-gradient(90deg,#14a94d,#c8ed51);transition:width .15s}
+#clock{font-size:23px;color:#ffdf73;font-weight:bold}
+#arena{width:100%;background:#1d303b;overflow:hidden}
+#game{width:100%;height:auto;display:block;touch-action:none}
+#message{text-align:center;padding:9px;background:#101d29;color:#ffdb76;font-size:13px;min-height:34px}
+#controls{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding:10px 2px}
+#controls button{min-height:53px;padding:8px 3px;font-size:12px;color:white;touch-action:none}
+.move{background:#326a88}
+.hit{background:#a9363a}
+.kick{background:#bd702a}
+.special{background:#70439b}
+.guard{background:#28795e}
+#controls button:active{filter:brightness(1.4);transform:scale(.96)}
+#subcontrols{display:flex;gap:8px;padding-bottom:12px}
+#subcontrols button{flex:1;font-size:12px}
+.note{text-align:center;color:#8fa3b2;font-size:11px;padding:8px}
+@media(min-width:700px){.roster{grid-template-columns:repeat(5,1fr)}#controls{max-width:650px;margin:auto}.person canvas{height:150px}}
 </style>
 </head>
 <body>
-
 <header>
-<h1>🇨🇴 COMBATE COLOMBIA</h1>
-<p>ARENA 2.5D • EDICIÓN V3</p>
+<h1>🇨🇴 COMBATE COLOMBIA 🇨🇴</h1>
+<p>ARENA DE COMBATE · EDICIÓN ESPECIAL</p>
 </header>
 
-<section id="selection" class="screen">
-<h2>SELECCIONA TU LUCHADOR</h2>
-<p>Escoge tu personaje para entrar a la arena.</p>
-<div class="grid" id="roster"></div>
-<button class="start" onclick="startGame()">🥊 COMENZAR COMBATE</button>
-<p class="note">Juego de ficción con personajes de sátira política.</p>
+<main>
+<section id="home" class="screen active">
+<h2>ELIGE TU DESTINO</h2>
+<div class="menu">
+<button class="primary" onclick="showScreen('select')">⚔️ JUGAR COMBATE</button>
+<button class="secondary" onclick="showScreen('how')">🎮 CÓMO JUGAR</button>
+</div>
+<p class="note">Un juego de lucha ficticio y satírico. Los personajes son caricaturas estilizadas.</p>
 </section>
 
-<section id="game" class="screen hidden">
-<div id="hud">
-<div><small id="nameA"></small><div class="health"><div id="lifeA" class="fill"></div></div></div>
-<div id="timer">60</div>
-<div><small id="nameB"></small><div class="health"><div id="lifeB" class="fill"></div></div></div>
-</div>
-
-<canvas id="arena" width="960" height="540"></canvas>
-<div id="message">¡QUE COMIENCE LA BATALLA!</div>
-
-<div class="controls">
-<button class="move" data-key="left">◀ IZQUIERDA</button>
-<button class="move" data-key="right">DERECHA ▶</button>
-<button class="move" data-key="up">⬆ ADELANTE</button>
-<button class="move" data-key="down">⬇ ATRÁS</button>
-<button data-action="punch">👊 GOLPE</button>
-<button data-action="kick">🦵 PATADA</button>
-<button class="special" data-action="special">⚡ ESPECIAL</button>
-<button data-action="block">🛡️ BLOQUEAR</button>
-</div>
-
-<button onclick="backToMenu()">VOLVER AL MENÚ</button>
-<p class="note">También puedes usar W A S D o las flechas del teclado. J: golpe, K: patada, L: especial.</p>
+<section id="how" class="screen">
+<h2>CONTROLES</h2>
+<p>Muévete con los botones o con las teclas WASD y las flechas.</p>
+<ul>
+<li>👊 Golpe: ataque rápido.</li>
+<li>🦵 Patada: más daño y alcance.</li>
+<li>⚡ Especial: consume energía.</li>
+<li>🛡️ Defensa: reduce el daño recibido.</li>
+<li>⬆️⬇️ Profundidad: esquiva moviéndote por la arena.</li>
+</ul>
+<button class="primary" onclick="showScreen('home')">VOLVER</button>
 </section>
+
+<section id="select" class="screen">
+<h2>SELECCIONA A TU LUCHADOR</h2>
+<div class="field"><label>Tu personaje</label><select id="p1"></select></div>
+<div class="field"><label>Tu rival</label><select id="p2"></select></div>
+<div class="field"><label>Escenario</label>
+<select id="stage">
+<option value="bogota">Plaza de Bolívar</option>
+<option value="medellin">Ciudad de montaña</option>
+<option value="cali">Arena tropical</option>
+<option value="night">Arena nocturna</option>
+</select></div>
+<div class="field"><label>Dificultad</label>
+<select id="difficulty">
+<option value="easy">Fácil</option>
+<option value="normal" selected>Normal</option>
+<option value="hard">Difícil</option>
+</select></div>
+<h2>LOS 10 LUCHADORES</h2>
+<div class="roster" id="roster"></div>
+<div class="menu">
+<button class="primary" onclick="startFight()">🔥 COMENZAR COMBATE</button>
+<button class="secondary" onclick="showScreen('home')">VOLVER AL MENÚ</button>
+</div>
+</section>
+
+<section id="battle" class="screen">
+<div class="hud">
+<div class="hudname"><span id="n1">JUGADOR</span><div class="life"><div id="hp1"></div></div></div>
+<div id="clock">99</div>
+<div class="hudname"><span id="n2">RIVAL</span><div class="life"><div id="hp2"></div></div></div>
+</div>
+<div id="arena"><canvas id="game" width="960" height="540"></canvas></div>
+<div id="message">¡QUE COMIENCE EL COMBATE!</div>
+<div id="controls">
+<button class="move" data-move="left">◀<br>IZQUIERDA</button>
+<button class="move" data-move="right">▶<br>DERECHA</button>
+<button class="move" data-move="up">⬆<br>FONDO</button>
+<button class="move" data-move="down">⬇<br>FRENTE</button>
+<button class="hit" onclick="attack('punch')">👊<br>GOLPE</button>
+<button class="kick" onclick="attack('kick')">🦵<br>PATADA</button>
+<button class="special" onclick="attack('special')">⚡<br>ESPECIAL</button>
+<button class="guard" onclick="attack('block')">🛡️<br>DEFENSA</button>
+</div>
+<div id="subcontrols">
+<button class="secondary" onclick="pauseFight()">⏸ PAUSA</button>
+<button class="secondary" onclick="startFight()">↻ REINICIAR</button>
+<button class="danger" onclick="showScreen('select')">SALIR</button>
+</div>
+<p class="note">En computador: A/D para moverte, W/S para profundidad, J/K/L para atacar y espacio para defender.</p>
+</section>
+</main>
 
 <script>
-const characters=[
-{name:"Gustavo Petro",face:"👨🏻",hair:"#29201d",skin:"#bb805f",suit:"#9b292d",tie:"#e8bd38",power:8},
-{name:"Álvaro Uribe",face:"👨🏻",hair:"#4a3020",skin:"#d49b72",suit:"#293e6a",tie:"#d9bc55",power:9},
-{name:"Iván Duque",face:"👨🏻",hair:"#392b20",skin:"#d5a27c",suit:"#80502e",tie:"#e1c34e",power:7},
-{name:"Juan Manuel Santos",face:"👨🏻",hair:"#777064",skin:"#d6a37f",suit:"#365c77",tie:"#d6d5cc",power:7},
-{name:"Iván Cepeda",face:"👨🏻",hair:"#aaa39a",skin:"#d0a080",suit:"#673b58",tie:"#e3c45d",power:8},
-{name:"Paloma Valencia",face:"👩🏻",hair:"#9b6032",skin:"#edc19f",suit:"#68428b",tie:"#d9bd43",power:8},
-{name:"Claudia López",face:"👩🏻",hair:"#63452e",skin:"#dfad89",suit:"#23765d",tie:"#e4c64c",power:8},
-{name:"Carlos F. Galán",face:"👨🏻",hair:"#44342c",skin:"#d6a080",suit:"#9a6331",tie:"#e1c34e",power:7},
-{name:"Federico Gutiérrez",face:"👨🏻",hair:"#493528",skin:"#d3a080",suit:"#36684a",tie:"#e2c64c",power:8},
-{name:"Abelardo de la Espriella",face:"👨🏻",hair:"#302b28",skin:"#d6a17b",suit:"#484568",tie:"#e6c64b",power:9}
+const $=id=>document.getElementById(id);
+const canvas=$("game"),ctx=canvas.getContext("2d");
+
+const people=[
+{name:"Gustavo Petro",skin:"#bd805d",hair:"#29201e",shirt:"#263d55",pants:"#202b37",tie:"#b52f35",style:"Líder"},
+{name:"Álvaro Uribe",skin:"#d5a078",hair:"#b9b3a4",shirt:"#d8d6ca",pants:"#343b46",tie:"#253e65",style:"Estratega"},
+{name:"Iván Duque",skin:"#d6a17c",hair:"#332820",shirt:"#263c56",pants:"#242d39",tie:"#a83c42",style:"Técnico"},
+{name:"Juan Manuel Santos",skin:"#d0a17f",hair:"#b3aa9a",shirt:"#e1ded3",pants:"#313844",tie:"#263f69",style:"Diplomático"},
+{name:"Iván Cepeda",skin:"#d5a17e",hair:"#302b28",shirt:"#383b42",pants:"#242b35",tie:"#a63a3a",style:"Analista"},
+{name:"Paloma Valencia",skin:"#e1b18f",hair:"#8b5b32",shirt:"#7a3151",pants:"#303846",tie:"#7a3151",style:"Ágil"},
+{name:"Claudia López",skin:"#d5a17d",hair:"#5b3828",shirt:"#315e69",pants:"#283642",tie:"#315e69",style:"Velocidad"},
+{name:"Carlos F. Galán",skin:"#d5a17d",hair:"#352a24",shirt:"#33465b",pants:"#26313d",tie:"#9c353b",style:"Equilibrado"},
+{name:"Federico Gutiérrez",skin:"#d6a17d",hair:"#3a2b24",shirt:"#354d3d",pants:"#26323b",tie:"#354d3d",style:"Potencia"},
+{name:"Abelardo de la Espriella",skin:"#d8a27d",hair:"#24201e",shirt:"#202a3d",pants:"#1c2633",tie:"#b18b39",style:"Fuerza"}
 ];
 
-const $=id=>document.getElementById(id);
-let chosen=0,playing=false,seconds=60,lastTime=0,frame=0,raf=0;
-let A=null,B=null,keys={},guard=false;
+let A=null,B=null,playing=false,paused=false,clock=99,last=0,aiTimer=0,raf=0;
+let combo=0,comboTimer=0,round=1;
+const keys={left:false,right:false,up:false,down:false};
 
-const roster=$("roster");
-characters.forEach((c,i)=>{
-let el=document.createElement("div");
-el.className="card"+(i===0?" selected":"");
-el.innerHTML=`<div class="portrait">${c.face}</div><strong>${c.name}</strong><small>Fuerza ${c.power}/10</small>`;
-el.onclick=()=>{
-chosen=i;
-document.querySelectorAll(".card").forEach(x=>x.classList.remove("selected"));
-el.classList.add("selected");
-};
-roster.appendChild(el);
-});
-
-function makeFighter(index,x,y,player){
-return {index,x,y,hp:100,player,action:"idle",actionTime:0,
-cooldown:0,face:player?1:-1,blocking:false};
+function showScreen(id){
+ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+ $(id).classList.add("active");
+ if(id!=="battle"){playing=false;paused=false;}
 }
 
-function startGame(){
-cancelAnimationFrame(raf);
-$("selection").classList.add("hidden");
-$("game").classList.remove("hidden");
-A=makeFighter(chosen,280,340,true);
-B=makeFighter((chosen+1)%10,680,340,false);
-$("nameA").textContent=characters[A.index].name;
-$("nameB").textContent=characters[B.index].name;
-seconds=60;playing=true;guard=false;lastTime=0;
-$("timer").textContent=seconds;
-$("message").textContent="¡PELEA!";
-updateHud();
-raf=requestAnimationFrame(loop);
+function init(){
+ people.forEach((p,i)=>{
+  $("p1").add(new Option(p.name,i));
+  $("p2").add(new Option(p.name,i));
+ });
+ $("p1").value="0";$("p2").value="1";
+ renderRoster();
+}
+function renderRoster(){
+ $("roster").innerHTML="";
+ people.forEach((p,i)=>{
+  const d=document.createElement("div");
+  d.className="person";
+  d.innerHTML="<canvas width='120' height='145'></canvas><strong>"+p.name+"</strong><small>"+p.style+"</small>";
+  $("roster").appendChild(d);
+  const c=d.querySelector("canvas").getContext("2d");
+  drawPortrait(c,p);
+ });
+}
+function drawPortrait(c,p){
+ c.fillStyle="#263b49";c.fillRect(0,0,120,145);
+ c.save();c.translate(60,132);c.scale(.55,.55);
+ drawBody(c,p,0,0,1,1,"idle",0);
+ c.restore();
 }
 
-function updateHud(){
-$("lifeA").style.width=A.hp+"%";
-$("lifeB").style.width=B.hp+"%";
+function makeFighter(index,x,player){
+ return {index,x,y:390,hp:100,energy:100,player,face:player?1:-1,
+ action:"idle",timer:0,cool:0,walk:0,flash:0,stun:0};
 }
 
-function say(text){$("message").textContent=text}
-
-function attack(f,type){
-if(!playing||f.hp<=0||f.cooldown>0)return;
-f.action=type;
-f.actionTime=type==="special"?.65:.35;
-f.cooldown=type==="special"?1.2:.55;
-let opponent=f.player?B:A;
-let distance=Math.abs(f.x-opponent.x);
-let lane=Math.abs(f.y-opponent.y);
-if(distance<175&&lane<75){
-let damage=type==="punch"?8:type==="kick"?13:22;
-if(opponent.blocking)damage=Math.ceil(damage*.25);
-opponent.hp=Math.max(0,opponent.hp-damage);
-opponent.action="hit";
-opponent.actionTime=.3;
-opponent.x+=f.face*12;
-say(type==="special"?"⚡ ¡PODER ESPECIAL!":type==="kick"?"🦵 ¡PATADA!":"👊 ¡GOLPE!");
-updateHud();
-if(opponent.hp<=0)finish(f.player);
-}else say("¡ACÉRCATE A TU RIVAL!");
+function startFight(){
+ let p=Number($("p1").value),q=Number($("p2").value);
+ if(p===q)q=(q+1)%people.length;
+ A=makeFighter(p,315,true);B=makeFighter(q,645,false);
+ clock=99;playing=true;paused=false;aiTimer=.5;combo=0;comboTimer=0;
+ $("n1").textContent=people[p].name;$("n2").textContent=people[q].name;
+ $("message").textContent="¡ROUND "+round+"! ¡A PELEAR!";
+ showScreen("battle");last=performance.now();updateHUD();
+ cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);
 }
 
-function defend(f){
-f.blocking=true;
-f.action="block";
-f.actionTime=.4;
+function updateHUD(){
+ if(!A||!B)return;
+ $("hp1").style.width=A.hp+"%";$("hp2").style.width=B.hp+"%";
+ $("clock").textContent=Math.ceil(clock);
 }
 
-function finish(winner){
-if(!playing)return;
-playing=false;
-say(winner===true?"🏆 ¡VICTORIA!":winner===false?"💥 ¡DERROTA!":"🤝 ¡EMPATE!");
+function say(t){$("message").textContent=t;}
+
+function attack(type){
+ if(!playing||paused||!A||A.cool>0)return;
+ if(type==="special"&&A.energy<30){say("¡Necesitas más energía para el especial!");return;}
+ A.action=type;A.timer=type==="special"?.65:type==="block"?.45:.35;
+ A.cool=type==="special"?1.1:.42;
+ if(type==="block"){say("¡Defensa!");return;}
+ if(type==="special")A.energy-=30;
+ hit(A,B,type);
 }
 
-function ai(dt){
-if(!playing)return;
-B.cooldown=Math.max(0,B.cooldown-dt);
-let dx=A.x-B.x,dy=A.y-B.y;
-if(Math.abs(dx)>130)B.x+=Math.sign(dx)*95*dt;
-if(Math.abs(dy)>28)B.y+=Math.sign(dy)*65*dt;
-B.x=Math.max(70,Math.min(890,B.x));
-B.y=Math.max(245,Math.min(420,B.y));
-if(Math.abs(dx)<155&&Math.abs(dy)<65&&B.cooldown<=0&&Math.random()<.07){
-attack(B,Math.random()<.3?"kick":"punch");
-}
-}
-
-function updateFighter(f,dt){
-f.cooldown=Math.max(0,f.cooldown-dt);
-f.actionTime=Math.max(0,f.actionTime-dt);
-if(f.actionTime===0&&f.action!=="idle"){
-f.action="idle";f.blocking=false;
-}
+function hit(attacker,target,type){
+ let dx=Math.abs(attacker.x-target.x),dy=Math.abs(attacker.y-target.y);
+ let reach=type==="kick"?155:type==="special"?190:125;
+ if(dx>reach||dy>62)return;
+ let damage=type==="special"?23:type==="kick"?14:9;
+ if(target.action==="block")damage=2;
+ target.hp=Math.max(0,target.hp-damage);
+ target.flash=.18;target.stun=.18;
+ target.action="hurt";target.timer=.22;
+ target.x+=attacker.face*12;
+ if(attacker.player){
+  combo++;comboTimer=1.5;
+  if(combo>=2)say("¡COMBO x"+combo+"!");
+  else say("¡GOLPE CERTERO!");
+ }else say("¡CUIDADO! EL RIVAL ATACA");
+ if(target.hp<=0)finish(attacker.player);
+ updateHUD();
 }
 
-function movePlayer(dt){
-if(!playing)return;
-let speed=210*dt;
-if(keys.left)A.x-=speed;
-if(keys.right)A.x+=speed;
-if(keys.up)A.y-=speed;
-if(keys.down)A.y+=speed;
-A.x=Math.max(50,Math.min(910,A.x));
-A.y=Math.max(245,Math.min(420,A.y));
-if(keys.left)A.face=-1;
-if(keys.right)A.face=1;
+function finish(playerWon){
+ playing=false;
+ say(playerWon?"🏆 ¡VICTORIA! "+people[A.index].name+" GANA":"💥 ¡DERROTA! "+people[B.index].name+" GANA");
 }
 
-const canvas=$("arena"),ctx=canvas.getContext("2d");
-
-function background(){
-let g=ctx.createLinearGradient(0,0,0,540);
-g.addColorStop(0,"#78b9d3");g.addColorStop(.62,"#c7d2d0");g.addColorStop(1,"#8c795d");
-ctx.fillStyle=g;ctx.fillRect(0,0,960,540);
-
-// edificios
-ctx.fillStyle="#d6c8aa";
-ctx.fillRect(35,110,180,145);
-ctx.fillRect(745,105,180,150);
-ctx.fillStyle="#9c7653";
-for(let x=55;x<210;x+=40)for(let y=135;y<235;y+=48)ctx.fillRect(x,y,18,24);
-for(let x=765;x<920;x+=40)for(let y=130;y<235;y+=48)ctx.fillRect(x,y,18,24);
-
-// plaza y palacio
-ctx.fillStyle="#e6e0ce";
-ctx.fillRect(285,120,390,130);
-ctx.fillStyle="#b7a78c";
-ctx.fillRect(310,150,340,100);
-ctx.fillStyle="#e9e1d0";
-ctx.fillRect(330,120,300,24);
-for(let x=345;x<625;x+=42){
-ctx.fillStyle="#8a8174";
-ctx.fillRect(x,153,12,88);
+function pauseFight(){
+ if(!A)return;
+ paused=!paused;
+ if(paused){playing=false;say("JUEGO EN PAUSA");}
+ else{playing=true;last=performance.now();say("¡CONTINÚA EL COMBATE!");}
 }
-ctx.fillStyle="#d2b66d";
-ctx.fillRect(470,85,20,36);
-ctx.fillRect(460,80,40,8);
 
-// bandera
-ctx.fillStyle="#f5d52b";ctx.fillRect(30,30,80,18);
-ctx.fillStyle="#2454a1";ctx.fillRect(30,48,80,18);
-ctx.fillStyle="#c83235";ctx.fillRect(30,66,80,18);
-ctx.fillStyle="#fff";ctx.font="bold 20px Arial";
-ctx.fillText("BOGOTÁ • COLOMBIA",350,45);
+function drawBackground(){
+ const stage=$("stage").value;
+ let sky=stage==="night"?"#111a38":stage==="cali"?"#8bb7b3":"#7899a4";
+ let ground=stage==="night"?"#24243b":stage==="cali"?"#42624b":"#45534b";
+ let g=ctx.createLinearGradient(0,0,0,540);
+ g.addColorStop(0,sky);g.addColorStop(.64,"#a4b1a5");g.addColorStop(1,ground);
+ ctx.fillStyle=g;ctx.fillRect(0,0,960,540);
 
-// suelo con perspectiva
-ctx.fillStyle="#8a7764";
-ctx.beginPath();ctx.moveTo(0,260);ctx.lineTo(960,260);ctx.lineTo(960,540);ctx.lineTo(0,540);ctx.fill();
-ctx.strokeStyle="#b8a58a";ctx.lineWidth=3;
-for(let y=285;y<540;y+=48){
-ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(960,y);ctx.stroke();
+ // Siluetas de montañas y edificios
+ ctx.fillStyle=stage==="night"?"#252a45":"#526b70";
+ ctx.beginPath();ctx.moveTo(0,260);ctx.lineTo(120,160);ctx.lineTo(220,245);ctx.lineTo(350,145);ctx.lineTo(480,245);ctx.lineTo(640,150);ctx.lineTo(800,245);ctx.lineTo(960,160);ctx.lineTo(960,350);ctx.lineTo(0,350);ctx.fill();
+ for(let i=0;i<12;i++){
+  let x=i*85;
+  ctx.fillStyle=i%2?"#667b7a":"#788b83";
+  ctx.fillRect(x,225+(i%3)*18,65,130);
+  ctx.fillStyle="#d7d0b6";
+  for(let j=0;j<3;j++)ctx.fillRect(x+9+j*18,240+(i%3)*18,8,13);
+ }
+ if(stage==="bogota"){
+  ctx.fillStyle="#d7d0bd";ctx.fillRect(350,205,260,100);
+  ctx.fillStyle="#7c6552";ctx.fillRect(375,175,210,40);
+  for(let x=390;x<580;x+=38){ctx.fillStyle="#53483d";ctx.fillRect(x,230,18,65);}
+ }
+ if(stage==="cali"){
+  for(let i=0;i<5;i++){ctx.fillStyle="#315c43";ctx.fillRect(40+i*200,180,15,160);ctx.beginPath();ctx.arc(48+i*200,170,40,0,7);ctx.fill();}
+ }
+ if(stage==="night"){
+  ctx.fillStyle="#fff2b5";
+  for(let i=0;i<35;i++){ctx.globalAlpha=.35+(i%3)*.2;ctx.fillRect((i*83)%960,(i*47)%180,3,3);}
+  ctx.globalAlpha=1;
+ }
+ // Bandera
+ ctx.fillStyle="#f5ce36";ctx.fillRect(785,75,105,21);
+ ctx.fillStyle="#2856a1";ctx.fillRect(785,96,105,21);
+ ctx.fillStyle="#b93136";ctx.fillRect(785,117,105,21);
+ ctx.fillStyle="#ddd";ctx.fillRect(780,70,5,145);
+
+ // Piso de perspectiva
+ ctx.fillStyle=ground;ctx.beginPath();ctx.moveTo(0,335);ctx.lineTo(960,335);ctx.lineTo(960,540);ctx.lineTo(0,540);ctx.fill();
+ ctx.strokeStyle="rgba(255,255,255,.17)";ctx.lineWidth=2;
+ for(let i=0;i<8;i++){let y=345+i*i*3.4;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(960,y);ctx.stroke();}
+ for(let x=-400;x<1400;x+=140){ctx.beginPath();ctx.moveTo(480,335);ctx.lineTo(x,540);ctx.stroke();}
 }
-for(let x=-300;x<1300;x+=150){
-ctx.beginPath();ctx.moveTo(480,260);ctx.lineTo(x,540);ctx.stroke();
+
+function limb(c,x1,y1,x2,y2,w,color){
+ c.lineCap="round";c.strokeStyle="#171b20";c.lineWidth=w+3;
+ c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();
+ c.strokeStyle=color;c.lineWidth=w;
+ c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();
 }
+
+function drawBody(c,p,x,y,s,dir,action,phase){
+ c.save();c.translate(x,y);c.scale(s,s);
+ let walk=action==="walk"?Math.sin(phase)*12:0;
+ let punch=action==="punch"||action==="special";
+ let kick=action==="kick";
+ let block=action==="block";
+ let shift=action==="hurt"?-5:0;
+
+ // Piernas articuladas
+ limb(c,-13,-76,-17+walk*.4,-40,17,p.pants);
+ limb(c,-17+walk*.4,-40,-23+walk,-8,12,p.pants);
+ limb(c,13,-76,17-walk*.4,-40,17,p.pants);
+ limb(c,17-walk*.4,-40,22-(kick?48:0)-walk,-8,12,p.pants);
+ // Rodillas
+ c.fillStyle=p.pants;
+ c.beginPath();c.arc(-17+walk*.4,-40,9,0,7);c.arc(17-walk*.4,-40,9,0,7);c.fill();
+ // Zapatos
+ limb(c,-23+walk,-8,-5+walk,-5,13,"#16191d");
+ limb(c,22-(kick?48:0)-walk,-8,38-(kick?48:0),-5,13,"#16191d");
+
+ // Cuello
+ c.fillStyle=p.skin;c.fillRect(-8,-139,16,21);
+ // Brazos traseros
+ limb(c,-24,-126,-39,-105,18,p.shirt);
+ limb(c,-39,-105,-42,-83,13,p.skin);
+ // Brazo delantero articulado
+ limb(c,24,-126,39,-106,18,p.shirt);
+ let hx=42+(punch?48:0),hy=block?-145:(punch?-128:-88);
+ limb(c,39,-106,hx,hy,13,p.skin);
+ c.fillStyle=p.skin;
+ c.beginPath();c.arc(hx,hy,9,0,7);c.arc(-42,-83,8,0,7);c.fill();
+
+ // Torso
+ c.fillStyle=p.shirt;
+ c.beginPath();c.moveTo(-25,-132);c.lineTo(25,-132);c.lineTo(31,-78);c.lineTo(18,-71);c.lineTo(-18,-71);c.lineTo(-31,-78);c.closePath();c.fill();
+ c.strokeStyle="rgba(0,0,0,.4)";c.lineWidth=2;c.stroke();
+ // Solapas y corbata
+ c.fillStyle="#eee7d9";
+ c.beginPath();c.moveTo(-11,-132);c.lineTo(0,-112);c.lineTo(-5,-103);c.fill();
+ c.beginPath();c.moveTo(11,-132);c.lineTo(0,-112);c.lineTo(5,-103);c.fill();
+ c.fillStyle=p.tie;
+ c.beginPath();c.moveTo(-4,-120);c.lineTo(4,-120);c.lineTo(8,-88);c.lineTo(0,-80);c.lineTo(-8,-88);c.fill();
+ // Cinturón
+ c.fillStyle="#b99a50";c.fillRect(-18,-77,36,5);
+
+ // Cabeza
+ c.fillStyle=p.skin;c.beginPath();c.ellipse(shift,-158,21,25,0,0,7);c.fill();
+ c.beginPath();c.arc(-20+shift,-155,5,0,7);c.arc(20+shift,-155,5,0,7);c.fill();
+ // Cabello
+ c.fillStyle=p.hair;c.beginPath();c.ellipse(shift,-173,22,12,0,Math.PI,Math.PI*2);c.fill();
+ c.fillRect(-21+shift,-173,5,13);c.fillRect(16+shift,-173,5,12);
+ // Ojos y expresión
+ c.fillStyle="#24201e";
+ c.beginPath();c.arc(-7+shift,-159,2,0,7);c.arc(7+shift,-159,2,0,7);c.fill();
+ c.strokeStyle="#694535";c.lineWidth=2;
+ c.beginPath();c.moveTo(-5+shift,-146);c.quadraticCurveTo(shift,-143,5+shift,-146);c.stroke();
+
+ // Efecto especial
+ if(action==="special"){
+  c.strokeStyle="#ffe46a";c.lineWidth=5;
+  c.beginPath();c.arc(0,-105,62+Math.sin(phase)*7,0,7);c.stroke();
+ }
+ if(action==="block"){
+  c.strokeStyle="#7be0ff";c.lineWidth=5;
+  c.beginPath();c.arc(0,-115,48,Math.PI,Math.PI*2);c.stroke();
+ }
+ c.restore();
 }
 
 function drawFighter(f){
-let c=characters[f.index];
-let scale=.78+(f.y-245)/175*.32;
-let x=f.x,y=f.y;
-ctx.save();
-ctx.translate(x,y);
-ctx.scale(scale,scale);
-ctx.scale(f.face,1);
-let moving=f.action==="idle"?Math.sin(frame*.006)*2:0;
-let attacking=f.action==="punch"||f.action==="kick"||f.action==="special";
-let hit=f.action==="hit";
-let swing=attacking?Math.sin(frame*.025)*.7:0;
-let legSwing=attacking?.5:Math.sin(frame*.01)*.08;
-
-// sombra
-ctx.fillStyle="rgba(0,0,0,.3)";
-ctx.beginPath();ctx.ellipse(0,5,48,12,0,0,Math.PI*2);ctx.fill();
-
-// piernas
-ctx.save();
-ctx.translate(0,moving);
-ctx.strokeStyle="#242632";ctx.lineWidth=17;ctx.lineCap="round";
-ctx.beginPath();ctx.moveTo(-13,-63);ctx.lineTo(-18+legSwing*15,-12);ctx.stroke();
-ctx.beginPath();ctx.moveTo(13,-63);ctx.lineTo(18-legSwing*15,-12);ctx.stroke();
-ctx.strokeStyle="#171a22";ctx.lineWidth=9;
-ctx.beginPath();ctx.moveTo(-18+legSwing*15,-12);ctx.lineTo(-35+legSwing*15,-9);ctx.stroke();
-ctx.beginPath();ctx.moveTo(18-legSwing*15,-12);ctx.lineTo(35-legSwing*15,-9);ctx.stroke();
-
-// chaqueta / cuerpo
-ctx.fillStyle=c.suit;
-ctx.beginPath();ctx.moveTo(-30,-155);ctx.lineTo(30,-155);ctx.lineTo(38,-72);ctx.lineTo(-38,-72);ctx.closePath();ctx.fill();
-ctx.strokeStyle="#28242a";ctx.lineWidth=3;ctx.stroke();
-ctx.fillStyle="#eee2d1";
-ctx.beginPath();ctx.moveTo(-9,-151);ctx.lineTo(0,-125);ctx.lineTo(10,-151);ctx.fill();
-ctx.fillStyle=c.tie;
-ctx.beginPath();ctx.moveTo(-4,-145);ctx.lineTo(4,-145);ctx.lineTo(7,-100);ctx.lineTo(0,-91);ctx.lineTo(-7,-100);ctx.fill();
-
-// brazos
-ctx.strokeStyle=c.skin;ctx.lineWidth=16;ctx.lineCap="round";
-ctx.beginPath();ctx.moveTo(-27,-145);ctx.lineTo(-42,-111);ctx.lineTo(-36,-90);ctx.stroke();
-ctx.save();
-ctx.translate(28,-145);
-ctx.rotate(attacking?-.9-swing:-.35);
-ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(12,33);ctx.lineTo(8,52);ctx.stroke();
-ctx.fillStyle=c.skin;ctx.beginPath();ctx.arc(8,55,10,0,Math.PI*2);ctx.fill();
-ctx.restore();
-
-// cabeza
-ctx.fillStyle=c.skin;
-ctx.beginPath();ctx.ellipse(0,-180,24,29,0,0,Math.PI*2);ctx.fill();
-ctx.strokeStyle="#29201d";ctx.lineWidth=2;ctx.stroke();
-// orejas
-ctx.beginPath();ctx.arc(-23,-179,6,0,Math.PI*2);ctx.arc(23,-179,6,0,Math.PI*2);ctx.fill();
-// cabello
-ctx.fillStyle=c.hair;
-ctx.beginPath();ctx.ellipse(0,-200,25,13,0,Math.PI,Math.PI*2);ctx.fill();
-ctx.fillRect(-23,-200,6,13);ctx.fillRect(17,-200,6,13);
-// ojos
-ctx.fillStyle="#211b18";
-ctx.beginPath();ctx.arc(-9,-182,2.5,0,Math.PI*2);ctx.arc(9,-182,2.5,0,Math.PI*2);ctx.fill();
-// nariz y boca
-ctx.strokeStyle="#754a39";ctx.lineWidth=2;
-ctx.beginPath();ctx.moveTo(0,-180);ctx.lineTo(-2,-172);ctx.lineTo(3,-171);ctx.stroke();
-ctx.beginPath();ctx.moveTo(-7,-164);ctx.lineTo(7,-164);ctx.stroke();
-ctx.restore();
-
-// indicador de bloqueo
-if(f.blocking){
-ctx.strokeStyle="#8adfff";ctx.lineWidth=4;
-ctx.beginPath();ctx.arc(0,-115,57,-1.2,1.2);ctx.stroke();
-}
-if(f.action==="special"){
-ctx.fillStyle="rgba(255,215,50,.75)";
-ctx.beginPath();ctx.arc(0,-110,75,0,Math.PI*2);ctx.stroke();
-}
-ctx.restore();
+ if(!f)return;
+ let p=people[f.index],scale=.78+(f.y-320)/500;
+ ctx.fillStyle="rgba(0,0,0,.35)";
+ ctx.beginPath();ctx.ellipse(f.x,f.y+5,45*scale,12*scale,0,0,7);ctx.fill();
+ ctx.save();ctx.translate(f.x,f.y);
+ ctx.scale(scale,scale);
+ drawBody(ctx,p,0,0,1,f.face,f.action,performance.now()/130);
+ ctx.restore();
+ ctx.textAlign="center";ctx.font="bold 14px Arial";
+ ctx.lineWidth=4;ctx.strokeStyle="#111";ctx.strokeText(p.name,f.x,f.y-205*scale);
+ ctx.fillStyle="white";ctx.fillText(p.name,f.x,f.y-205*scale);
 }
 
-function loop(timestamp){
-if(!playing)return;
-if(!lastTime)lastTime=timestamp;
-let dt=Math.min((timestamp-lastTime)/1000,.04);
-lastTime=timestamp;
-frame=timestamp;
-movePlayer(dt);
-ai(dt);
-updateFighter(A,dt);
-updateFighter(B,dt);
-background();
+function update(dt){
+ if(!playing||paused||!A||!B)return;
+ clock-=dt;
+ if(clock<=0){clock=0;playing=false;say("⏱️ ¡TIEMPO TERMINADO!");}
+ [A,B].forEach(f=>{
+  f.cool=Math.max(0,f.cool-dt);
+  f.timer=Math.max(0,f.timer-dt);
+  f.flash=Math.max(0,f.flash-dt);
+  f.stun=Math.max(0,f.stun-dt);
+  if(f.timer===0&&["punch","kick","special","block","hurt","walk"].includes(f.action))f.action="idle";
+  f.energy=Math.min(100,f.energy+5*dt);
+ });
+ let moved=false;
+ if(A.stun<=0){
+  if(keys.left){A.x-=190*dt;A.face=-1;moved=true;}
+  if(keys.right){A.x+=190*dt;A.face=1;moved=true;}
+  if(keys.up){A.y-=120*dt;moved=true;}
+  if(keys.down){A.y+=120*dt;moved=true;}
+ }
+ A.x=Math.max(55,Math.min(905,A.x));A.y=Math.max(345,Math.min(480,A.y));
+ if(moved&&A.action==="idle")A.action="walk";
+ if(!moved&&A.action==="walk")A.action="idle";
 
-// dibujar según profundidad
-if(A.y<B.y){drawFighter(A);drawFighter(B)}
-else{drawFighter(B);drawFighter(A)}
-
-if(seconds>0){
-window._clock=(window._clock||0)+dt;
-if(window._clock>=1){
-seconds--;window._clock=0;
-$("timer").textContent=seconds;
-if(seconds<=0)finish(A.hp===B.hp?null:A.hp>B.hp);
-}
-}
-raf=requestAnimationFrame(loop);
-}
-
-function finish(winner){
-playing=false;
-cancelAnimationFrame(raf);
-say(winner===true?"🏆 ¡VICTORIA!":winner===false?"💥 ¡DERROTA!":"🤝 ¡EMPATE!");
-}
-
-function backToMenu(){
-playing=false;cancelAnimationFrame(raf);
-$("game").classList.add("hidden");
-$("selection").classList.remove("hidden");
-}
-
-function action(name){
-if(!playing)return;
-if(name==="punch")attack(A,"punch");
-if(name==="kick")attack(A,"kick");
-if(name==="special")attack(A,"special");
-if(name==="block")defend(A);
+ // Inteligencia artificial
+ aiTimer-=dt;
+ if(aiTimer<=0&&B.stun<=0){
+  let dx=A.x-B.x,dy=A.y-B.y;
+  let difficulty=$("difficulty").value;
+  let speed=difficulty==="hard"?115:difficulty==="normal"?85:60;
+  if(Math.abs(dx)>100){B.x+=Math.sign(dx)*speed*dt;B.face=dx>0?1:-1;}
+  if(Math.abs(dy)>22)B.y+=Math.sign(dy)*55*dt;
+  let chance=difficulty==="hard"?.78:difficulty==="normal"?.55:.34;
+  if(Math.abs(dx)<150&&Math.abs(dy)<65&&B.cool<=0&&Math.random()<chance){
+   let type=Math.random()<.28?"kick":"punch";
+   B.action=type;B.timer=.35;B.cool=difficulty==="hard"?.65:1;
+   hit(B,A,type);
+  }
+  aiTimer=difficulty==="hard"?.12:.22;
+ }
+ B.x=Math.max(55,Math.min(905,B.x));B.y=Math.max(345,Math.min(480,B.y));
+ comboTimer-=dt;if(comboTimer<=0)combo=0;
+ updateHUD();
 }
 
-// controles táctiles
-document.querySelectorAll("[data-key]").forEach(btn=>{
-let key=btn.dataset.key;
-btn.addEventListener("pointerdown",e=>{e.preventDefault();keys[key]=true});
-["pointerup","pointercancel","pointerleave"].forEach(ev=>btn.addEventListener(ev,()=>keys[key]=false));
+function render(){
+ ctx.clearRect(0,0,960,540);drawBackground();
+ if(A&&B){
+  [A,B].sort((a,b)=>a.y-b.y).forEach(drawFighter);
+  // Energía especial
+  ctx.fillStyle="#111";ctx.fillRect(20,20,180,12);
+  ctx.fillStyle="#54d7e7";ctx.fillRect(20,20,180*A.energy/100,12);
+  ctx.strokeStyle="#fff";ctx.strokeRect(20,20,180,12);
+  ctx.fillStyle="#fff";ctx.font="12px Arial";ctx.textAlign="left";ctx.fillText("ENERGÍA",20,15);
+ }
+}
+function loop(now){
+ let dt=Math.min((now-last)/1000,.04);last=now;
+ update(dt);render();
+ if($("battle").classList.contains("active"))raf=requestAnimationFrame(loop);
+}
+
+// Teclado
+window.addEventListener("keydown",e=>{
+ let k=e.key.toLowerCase();
+ if(["arrowleft","arrowright","arrowup","arrowdown"," "].includes(k))e.preventDefault();
+ if(k==="arrowleft"||k==="a")keys.left=true;
+ if(k==="arrowright"||k==="d")keys.right=true;
+ if(k==="arrowup"||k==="w")keys.up=true;
+ if(k==="arrowdown"||k==="s")keys.down=true;
+ if(!e.repeat){
+  if(k==="j")attack("punch");
+  if(k==="k")attack("kick");
+  if(k==="l")attack("special");
+  if(k===" ")attack("block");
+ }
 });
-document.querySelectorAll("[data-action]").forEach(btn=>{
-btn.addEventListener("pointerdown",e=>{e.preventDefault();action(btn.dataset.action)});
+window.addEventListener("keyup",e=>{
+ let k=e.key.toLowerCase();
+ if(k==="arrowleft"||k==="a")keys.left=false;
+ if(k==="arrowright"||k==="d")keys.right=false;
+ if(k==="arrowup"||k==="w")keys.up=false;
+ if(k==="arrowdown"||k==="s")keys.down=false;
 });
 
-// teclado
-document.addEventListener("keydown",e=>{
-let k=e.key.toLowerCase();
-if(["arrowleft","a"].includes(k))keys.left=true;
-if(["arrowright","d"].includes(k))keys.right=true;
-if(["arrowup","w"].includes(k))keys.up=true;
-if(["arrowdown","s"].includes(k))keys.down=true;
-if(k==="j")action("punch");
-if(k==="k")action("kick");
-if(k==="l")action("special");
+// Controles táctiles con pulsación sostenida
+document.querySelectorAll("[data-move]").forEach(btn=>{
+ let key=btn.dataset.move;
+ const on=e=>{e.preventDefault();keys[key]=true;};
+ const off=e=>{e.preventDefault();keys[key]=false;};
+ btn.addEventListener("pointerdown",on);
+ btn.addEventListener("pointerup",off);
+ btn.addEventListener("pointerleave",off);
+ btn.addEventListener("pointercancel",off);
 });
-document.addEventListener("keyup",e=>{
-let k=e.key.toLowerCase();
-if(["arrowleft","a"].includes(k))keys.left=false;
-if(["arrowright","d"].includes(k))keys.right=false;
-if(["arrowup","w"].includes(k))keys.up=false;
-if(["arrowdown","s"].includes(k))keys.down=false;
-});
+
+// Soltar todos los controles si se interrumpe el toque
+window.addEventListener("blur",()=>Object.keys(keys).forEach(k=>keys[k]=false));
+
+init();render();
 </script>
 </body>
 </html>
