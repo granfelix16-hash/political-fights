@@ -3,213 +3,169 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>COMBATE COLOMBIA</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>COMBATE COLOMBIA V2</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#101525;color:white;font-family:Arial;text-align:center;touch-action:none}
-header{padding:13px;background:#151c30}
-h1{margin:3px;color:#ffd43b;font-size:clamp(23px,6vw,36px);text-shadow:3px 3px #a22}
-header p{font-size:11px;letter-spacing:3px;color:#cbd5e1}
-.hud{display:flex;justify-content:space-around;padding:10px;gap:10px}
-.player{width:42%;font-weight:bold;font-size:12px}
-.bar{height:17px;background:#542d38;border:2px solid white;margin-top:5px}
-.life{height:100%;width:100%;background:#39dc65}
-#timer{font-size:23px;color:#ffd43b;font-weight:bold}
-canvas{display:block;width:100%;height:55vh;max-height:430px;background:#526b87;image-rendering:pixelated}
-#message{padding:8px;color:#ffd43b;font-weight:bold}
-#start{background:#d42f40;color:white;border:2px solid #ffd43b;border-radius:12px;padding:13px 25px;font-size:17px;font-weight:bold}
-.controls{display:flex;justify-content:space-around;gap:5px;padding:12px 5px}
-.group{display:grid;grid-template-columns:repeat(2,65px);gap:8px}
-button.control{height:57px;background:#293854;color:white;border:2px solid #8794ae;border-radius:13px;font-size:16px;font-weight:bold;touch-action:none}
-button.control:active{background:#d52f40}
-.attack{background:#922d38!important}
-footer{font-size:10px;color:#8290aa;padding:5px}
+body{margin:0;background:#101326;color:white;font-family:Arial,sans-serif;text-align:center}
+header{padding:20px;background:linear-gradient(120deg,#172044,#5b183c)}
+h1{font-size:clamp(25px,7vw,42px);color:#ffd43b;margin:5px;text-shadow:3px 3px #c22}
+header p{color:#ddd;margin:8px}
+button{border:0;border-radius:10px;padding:13px 17px;font-weight:bold;background:#ffd43b;color:#171717;cursor:pointer}
+button:active{transform:scale(.95)}
+.screen{padding:15px;max-width:850px;margin:auto}
+.hidden{display:none!important}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.fighter{background:#252b48;border:2px solid #444b70;border-radius:12px;padding:12px;cursor:pointer}
+.fighter.selected{border-color:#ffd43b;background:#48402c}
+.avatar{font-size:48px;display:block;margin:5px}
+.fighter strong{display:block}
+small{color:#ccc}
+#arena{position:relative;overflow:hidden;border:3px solid #e2c16a;border-radius:12px;height:290px;background:linear-gradient(#72b8d6 0 55%,#b4a17b 55% 70%,#454b4d 70%);margin:12px auto}
+#arena:before{content:"🏛️  🏛️  🏛️";position:absolute;top:65px;left:0;width:100%;font-size:53px;letter-spacing:4px}
+#arena:after{content:"PLAZA DE BOLÍVAR • COLOMBIA";position:absolute;bottom:8px;left:0;width:100%;font-size:12px;color:white;font-weight:bold;text-shadow:1px 2px black}
+.fighter-sprite{position:absolute;bottom:48px;font-size:76px;z-index:2;transition:transform .12s}
+#playerSprite{left:15%}
+#enemySprite{right:15%;transform:scaleX(-1)}
+#playerSprite.hit{transform:translateX(25px) rotate(-12deg)}
+#enemySprite.hit{transform:scaleX(-1) translateX(25px) rotate(-12deg)}
+.hud{display:grid;grid-template-columns:1fr 65px 1fr;align-items:center;gap:8px}
+.health{height:20px;background:#555;border:2px solid white;border-radius:6px;overflow:hidden}
+.fill{height:100%;width:100%;background:#39d66c;transition:width .2s}
+#enemyHealth{background:#f14e50}
+#timer{font-size:25px;font-weight:bold}
+#controls{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:15px auto}
+#controls button{padding:18px 3px;font-size:13px;background:#303a64;color:white;border:1px solid #7884b8}
+#controls button.special{background:#a82f56}
+#message{min-height:28px;color:#ffd43b;font-weight:bold}
+@media(min-width:600px){.grid{grid-template-columns:repeat(3,1fr)}#arena{height:350px}}
 </style>
 </head>
 <body>
 <header>
-<h1>🇨🇴 COMBATE COLOMBIA 🇨🇴</h1>
-<p>EL RING DE LA PATRIA • ARCADE</p>
+<h1>🇨🇴 COMBATE COLOMBIA</h1>
+<p>¡Que comience el combate!</p>
 </header>
 
+<section id="selection" class="screen">
+<h2>ELIGE TU LUCHADOR</h2>
+<p>Selecciona tu personaje para comenzar.</p>
+<div class="grid" id="fighters"></div>
+<br>
+<button onclick="startGame()">⚔️ COMENZAR COMBATE</button>
+</section>
+
+<section id="game" class="screen hidden">
 <div class="hud">
-<div class="player">JUGADOR 1<div class="bar"><div id="life1" class="life"></div></div></div>
-<div id="timer">99</div>
-<div class="player">RIVAL CPU<div class="bar"><div id="life2" class="life"></div></div></div>
+<div><small id="playerName">JUGADOR</small><div class="health"><div class="fill" id="playerHealth"></div></div></div>
+<div id="timer">60</div>
+<div><small id="enemyName">RIVAL</small><div class="health"><div class="fill" id="enemyHealth"></div></div></div>
 </div>
-
-<canvas id="game" width="800" height="450"></canvas>
-<div id="message">¡PREPÁRATE PARA EL COMBATE!</div>
-<button id="start">🥊 COMENZAR PELEA</button>
-
-<div class="controls">
-<div class="group">
-<button class="control" data-key="left">◀</button>
-<button class="control" data-key="right">▶</button>
-<button class="control" data-key="jump">⬆ SALTAR</button>
-<button class="control" data-key="block">🛡 DEFENSA</button>
+<div id="arena">
+<div id="playerSprite" class="fighter-sprite">🧔</div>
+<div id="enemySprite" class="fighter-sprite">👨</div>
 </div>
-<div class="group">
-<button class="control attack" data-key="punch">👊 GOLPE</button>
-<button class="control attack" data-key="kick">🦵 PATADA</button>
-<button class="control" data-key="special">⚡ PODER</button>
-<button class="control" data-key="down">⬇</button>
+<div id="message">¡Prepárate para luchar!</div>
+<div id="controls">
+<button onclick="attack('punch')">👊<br>GOLPE</button>
+<button onclick="attack('kick')">🦵<br>PATADA</button>
+<button onclick="attack('special')" class="special">⚡<br>ESPECIAL</button>
+<button onclick="defend()">🛡️<br>DEFENDER</button>
 </div>
-</div>
-<footer>COMBATE COLOMBIA • PROTOTIPO 1.0</footer>
+<button onclick="backToMenu()">VOLVER AL MENÚ</button>
+</section>
 
 <script>
-const c=document.getElementById("game");
-const ctx=c.getContext("2d");
-const W=800,H=450;
-const keys={};
-let playing=false,finished=false,time=99,elapsed=0,last=0;
-let p1,p2;
+const characters=[
+{name:"Gustavo Petro",emoji:"🧔",power:8},
+{name:"Álvaro Uribe",emoji:"👨🏻",power:9},
+{name:"Iván Duque",emoji:"👨🏼",power:7},
+{name:"Juan Manuel Santos",emoji:"👨🏻‍🦳",power:7},
+{name:"Iván Cepeda",emoji:"👨🏻‍🦲",power:8},
+{name:"Paloma Valencia",emoji:"👩🏼",power:8},
+{name:"Claudia López",emoji:"👩🏻",power:8},
+{name:"Carlos Fernando Galán",emoji:"👨🏻‍🦱",power:7},
+{name:"Federico Gutiérrez",emoji:"👨🏻‍💼",power:8},
+{name:"Abelardo de la Espriella",emoji:"🕴️",power:9}
+];
+let chosen=0,player=100,enemy=100,time=60,interval=null,guard=false,busy=false;
+const $=id=>document.getElementById(id);
 
-function fighter(x,color,face){
-return {x,y:350,vy:0,hp:100,color,face,attack:0,kind:"",cool:0,guard:false,ground:true};
-}
-function reset(){
-p1=fighter(220,"#2676e8",1);
-p2=fighter(580,"#db3444",-1);
-playing=true;finished=false;time=99;elapsed=0;
+characters.forEach((c,i)=>{
+let d=document.createElement("div");
+d.className="fighter"+(i===0?" selected":"");
+d.innerHTML=`<span class="avatar">${c.emoji}</span><strong>${c.name}</strong><small>Fuerza: ${c.power}/10</small>`;
+d.onclick=()=>{
+chosen=i;
+document.querySelectorAll(".fighter").forEach(x=>x.classList.remove("selected"));
+d.classList.add("selected");
+};
+$("fighters").appendChild(d);
+});
+
+function startGame(){
+player=100;enemy=100;time=60;guard=false;busy=false;
+$("selection").classList.add("hidden");
+$("game").classList.remove("hidden");
+$("playerName").textContent=characters[chosen].name;
+$("enemyName").textContent=characters[(chosen+1)%10].name;
+$("playerSprite").textContent=characters[chosen].emoji;
+$("enemySprite").textContent=characters[(chosen+1)%10].emoji;
 update();
-document.getElementById("message").textContent="¡A LUCHAR!";
-}
-function rect(x,y,w,h,color){
-ctx.fillStyle=color;ctx.fillRect(x,y,w,h);
-}
-function background(){
-let g=ctx.createLinearGradient(0,0,0,H);
-g.addColorStop(0,"#66a9d1");g.addColorStop(1,"#b9a17a");
-ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-ctx.fillStyle="#526f70";
-ctx.beginPath();ctx.moveTo(0,260);ctx.lineTo(150,100);ctx.lineTo(280,260);ctx.lineTo(440,90);ctx.lineTo(630,260);ctx.lineTo(800,120);ctx.lineTo(800,350);ctx.lineTo(0,350);ctx.fill();
-for(let i=0;i<9;i++){
-let x=i*95;
-rect(x,190,70,160,"#b58a6c");
-for(let j=0;j<3;j++)rect(x+10+j*19,210,9,13,"#f8d779");
-}
-rect(0,350,800,100,"#a77c52");
-rect(0,350,800,7,"#e1bd8c");
-for(let i=0;i<10;i++)rect(i*90,380,2,70,"#d3a77b");
-}
-function drawFighter(f){
-ctx.save();
-ctx.translate(f.x,f.y);
-ctx.scale(f.face,1);
-let hit=f.attack>0;
-let skin="#d99a72";
-rect(-15,-65,30,35,f.color);
-rect(-19,-78,38,17,skin);
-rect(-20,-81,40,8,"#262331");
-rect(-12,-68,4,4,"#161616");
-rect(8,-68,4,4,"#161616");
-rect(-16,-32,13,29,"#25375c");
-rect(4,-32,13,29,"#25375c");
-rect(-20,-4,19,7,"#222");
-rect(3,-4,20,7,"#222");
-if(f.guard){
-rect(17,-65,13,30,"#d6b34d");
-}else if(hit){
-rect(15,-67,hit?43:15,12,"#d99a72");
-rect(54,-69,13,14,"#f2c49b");
-}else{
-rect(14,-68,12,30,skin);
-}
-rect(-25,-62,10,27,skin);
-if(f.attack>0){
-ctx.fillStyle="#fff3a1";
-ctx.beginPath();ctx.arc(65,-65,8,0,Math.PI*2);ctx.fill();
-}
-ctx.restore();
-text(f===p1?"JUGADOR":"RIVAL",f.x, f.y-100,13,"white");
-}
-function text(t,x,y,s,color){
-ctx.fillStyle=color;ctx.font="bold "+s+"px Arial";ctx.textAlign="center";ctx.fillText(t,x,y);
+$("message").textContent="¡A LUCHAR!";
+clearInterval(interval);
+interval=setInterval(()=>{
+time--;
+$("timer").textContent=time;
+if(time<=0)finish();
+else if(Math.random()<.45)enemyAttack();
+},1000);
 }
 function update(){
-document.getElementById("life1").style.width=p1.hp+"%";
-document.getElementById("life2").style.width=p2.hp+"%";
-document.getElementById("timer").textContent=time;
+$("playerHealth").style.width=Math.max(0,player)+"%";
+$("enemyHealth").style.width=Math.max(0,enemy)+"%";
 }
-function attack(a,b,type){
-if(a.cool>0||!playing)return;
-a.attack=18;a.kind=type;a.cool=type==="special"?75:35;
-let distance=Math.abs(a.x-b.x);
-if(distance<105){
-let damage=type==="punch"?9:type==="kick"?13:24;
-if(!b.guard)b.hp=Math.max(0,b.hp-damage);
-else b.hp=Math.max(0,b.hp-damage*.2);
+function animate(id){
+let el=$(id);
+el.classList.add("hit");
+setTimeout(()=>el.classList.remove("hit"),180);
+}
+function attack(type){
+if(busy||!interval||time<=0)return;
+busy=true;
+let damage=type==="punch"?8:type==="kick"?13:22;
+if(type==="special"&&Math.random()<.25)damage=10;
+enemy=Math.max(0,enemy-damage);
+animate("playerSprite");
+$("message").textContent=(type==="special"?"⚡ ¡PODER ESPECIAL! ":type==="kick"?"🦵 ¡PATADA! ":"👊 ¡GOLPE! ")+ "-"+damage;
 update();
+if(enemy<=0){finish();return}
+setTimeout(()=>{busy=false},350);
 }
+function defend(){
+if(!interval||time<=0)return;
+guard=true;
+$("message").textContent="🛡️ ¡DEFENSA ACTIVADA!";
+setTimeout(()=>guard=false,1300);
 }
-function move(f){
-if(f.attack>0)f.attack--;
-if(f.cool>0)f.cool--;
-if(f.vy!==0||!f.ground){
-f.y+=f.vy;f.vy+=.8;
-if(f.y>=350){f.y=350;f.vy=0;f.ground=true;}
+function enemyAttack(){
+if(enemy<=0||player<=0)return;
+let damage=guard?3:Math.floor(Math.random()*8)+4;
+player=Math.max(0,player-damage);
+animate("enemySprite");
+$("message").textContent="¡El rival ataca! -"+damage;
+update();
+if(player<=0)finish();
 }
+function finish(){
+clearInterval(interval);interval=null;busy=false;
+$("message").textContent=player>enemy?"🏆 ¡VICTORIA!":player<enemy?"💥 ¡DERROTA!":"🤝 ¡EMPATE!";
 }
-function draw(){
-ctx.clearRect(0,0,W,H);
-background();
-if(p1&&p2){
-drawFighter(p1);drawFighter(p2);
+function backToMenu(){
+clearInterval(interval);interval=null;
+$("game").classList.add("hidden");
+$("selection").classList.remove("hidden");
 }
-}
-function finish(msg){
-playing=false;finished=true;
-document.getElementById("message").textContent=msg;
-}
-function loop(now){
-let dt=Math.min((now-last)/16.67,3);last=now;
-if(playing){
-elapsed+=dt;
-if(elapsed>60){elapsed=0;time--;update();}
-p1.guard=!!keys.block;
-p2.guard=false;
-let speed=4;
-if(keys.left)p1.x-=speed*dt;
-if(keys.right)p1.x+=speed*dt;
-if(keys.jump&&p1.ground){p1.vy=-13;p1.ground=false;}
-if(keys.punch)attack(p1,p2,"punch");
-if(keys.kick)attack(p1,p2,"kick");
-if(keys.special)attack(p1,p2,"special");
-let dist=p1.x-p2.x;
-p2.face=dist<0?1:-1;
-if(Math.abs(dist)>80)p2.x+=Math.sign(dist)*2.1*dt;
-else if(Math.random()<.035*dt)attack(p2,p1,Math.random()<.5?"punch":"kick");
-if(p2.hp<=0)finish("🏆 ¡VICTORIA COLOMBIANA!");
-if(p1.hp<=0)finish("¡DERROTA! INTENTA OTRA VEZ");
-if(time<=0)finish(p1.hp>=p2.hp?"¡GANASTE!":"¡GANA EL RIVAL!");
-p1.x=Math.max(30,Math.min(770,p1.x));
-p2.x=Math.max(30,Math.min(770,p2.x));
-move(p1);move(p2);
-}
-draw();
-requestAnimationFrame(loop);
-}
-document.querySelectorAll("[data-key]").forEach(btn=>{
-let key=btn.dataset.key;
-btn.addEventListener("pointerdown",e=>{
-e.preventDefault();keys[key]=true;
-});
-["pointerup","pointerleave","pointercancel"].forEach(event=>{
-btn.addEventListener(event,()=>keys[key]=false);
-});
-});
-window.addEventListener("keydown",e=>{
-keys[({ArrowLeft:"left",ArrowRight:"right",ArrowUp:"jump", " ":"punch",z:"kick",x:"special"})[e.key]||e.key]=true;
-});
-window.addEventListener("keyup",e=>{
-keys[({ArrowLeft:"left",ArrowRight:"right",ArrowUp:"jump"," ":"punch",z:"kick",x:"special"})[e.key]||e.key]=false;
-});
-document.getElementById("start").addEventListener("click",reset);
-reset();
-requestAnimationFrame(loop);
 </script>
 </body>
 </html>
